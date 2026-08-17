@@ -220,13 +220,13 @@ in
             let
               python = pkgs.python3.withPackages (ps: with ps; [ pyyaml ]);
               enabledSourcesCmds = map (
-                src: "${python.interpreter} ${pkg}/bin/suricata-update enable-source ${src}"
+                src: "${python.interpreter} ${lib.getExe' pkg "suricata-update"} enable-source ${src}"
               ) cfg.enabledSources;
             in
             ''
               ${concatStringsSep "\n" enabledSourcesCmds}
-              ${python.interpreter} ${pkg}/bin/suricata-update update-sources
-              ${python.interpreter} ${pkg}/bin/suricata-update update --suricata-conf ${cfg.configFile} --no-test \
+              ${python.interpreter} ${lib.getExe' pkg "suricata-update"} update-sources
+              ${python.interpreter} ${lib.getExe' pkg "suricata-update"} update --suricata-conf ${cfg.configFile} --no-test \
                 --disable-conf ${pkgs.writeText "suricata-disable-conf" "${concatStringsSep "\n" cfg.disabledRules}"}
             '';
           serviceConfig = {
@@ -256,8 +256,10 @@ in
               interfaceOptions = strings.concatMapStrings (interface: " -i ${interface}") captureInterfaces;
             in
             {
-              ExecStartPre = "!${pkg}/bin/suricata -c ${cfg.configFile} -T";
-              ExecStart = "!${pkg}/bin/suricata -c ${cfg.configFile}${interfaceOptions}";
+              ExecStartPre = "!${lib.getExe' pkg "suricata"} -c ${cfg.configFile} -T";
+              ExecStart = "!${lib.getExe' pkg "suricata"} -c ${cfg.configFile}${interfaceOptions}";
+              # could use SIGUSR2, but it's asynchronous
+              ExecReload = "${lib.getExe' pkg "suricatasc"} -c reload-rules";
               Restart = "on-failure";
 
               User = cfg.settings.run-as.user;
