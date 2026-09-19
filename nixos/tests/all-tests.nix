@@ -1279,6 +1279,7 @@ in
   nginx-tmpdir = runTest ./nginx-tmpdir.nix;
   nginx-unix-socket = runTest ./nginx-unix-socket.nix;
   nginx-variants = import ./nginx-variants.nix { inherit runTest; };
+  nginx-wge = runTest ./nginx-wge.nix;
   nifi = runTestOn [ "x86_64-linux" ] ./web-apps/nifi.nix;
   nimdow = runTest ./nimdow.nix;
   nipap = runTest ./web-apps/nipap.nix;
